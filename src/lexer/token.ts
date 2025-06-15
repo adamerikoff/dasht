@@ -3,7 +3,7 @@
 export enum TokenType {
     ILLEGAL = "ILLEGAL",
     NEWLINE = "NEWLINE",
-    EOF = "END_OF_FILE",
+    EOF = "EOF",
 
     // Identifiers + literals
     IDENTIFIER = "IDENTIFIER",
@@ -22,6 +22,8 @@ export enum TokenType {
     GT = ">",
     EQ = "==",
     NOT_EQ = "!=",
+    LTE = "<=",
+    GTE = ">=",
 
     // Delimiters
     COMMA = ",",
@@ -47,25 +49,15 @@ export enum TokenType {
     WHILE = "WHILE"
 }
 
+// Interface to store keyword information
+export interface KeywordInfo {
+    type: TokenType;
+    baseLiteral: string; // The unified/base literal for this keyword
+}
+
 export interface Token {
     type: TokenType;
     literal: string;
     line: number;      // The line number where the token starts
     column: number;    // The column number where the token starts
 }
-
-// A map to quickly look up if an identifier is a reserved keyword
-export const keywords: { [key: string]: TokenType } = {
-    "fn": TokenType.FUNCTION,
-    "let": TokenType.LET,
-    "true": TokenType.TRUE,
-    "false": TokenType.FALSE,
-    "if": TokenType.IF,
-    "else": TokenType.ELSE,
-    "elsif": TokenType.ELSIF,
-    "return": TokenType.RETURN,
-    "and": TokenType.AND,
-    "or": TokenType.OR,
-    "for": TokenType.FOR,
-    "while": TokenType.WHILE,
-};
