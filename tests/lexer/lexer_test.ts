@@ -10,9 +10,9 @@ console.log("======================================");
 console.log("======================================");
 
 Deno.test("Lexer: handles ILLEGAL token", () => {
-    const input = `~`; // An illegal character
+    const input = `;`; // An illegal character
     const expectedTokens: Token[] = [
-        { type: TokenType.ILLEGAL, literal: "~", line: 1, column: 1 },
+        { type: TokenType.ILLEGAL, literal: ";", line: 1, column: 1 },
         { type: TokenType.EOF, literal: "", line: 1, column: 2 },
     ];
 
@@ -926,5 +926,155 @@ Deno.test("Lexer: comprehensive test with all token types (no semicolons, indent
         assertEquals(actualToken.literal, expectedToken.literal, `Mismatch at token ${i}: Expected literal '${expectedToken.literal}', got '${actualToken.literal}' at line ${actualToken.line}, col ${actualToken.column}`);
         assertEquals(actualToken.line, expectedToken.line, `Mismatch at token ${i}: Expected line ${expectedToken.line}, got ${actualToken.line} for literal '${expectedToken.literal}'`);
         assertEquals(actualToken.column, expectedToken.column, `Mismatch at token ${i}: Expected column ${expectedToken.column}, got ${actualToken.column} for literal '${expectedToken.literal}'`);
+    }
+});
+
+// --- Updated Test: Lexer handles single TILDE character ---
+Deno.test("Lexer: handles single TILDE token", () => {
+    const input = `~`;
+    const expectedTokens: Token[] = [
+        // Now it should be a TILDE token, not ILLEGAL
+        { type: TokenType.TILDE, literal: "~", line: 1, column: 1 },
+        { type: TokenType.EOF, literal: "", line: 1, column: 2 },
+    ];
+
+    // Instantiate lexer with base_keywords as the initial set
+    const lexer = new Lexer(input, base_keywords);
+    for (const expectedToken of expectedTokens) {
+        const actualToken = lexer.nextToken();
+        assertEquals(actualToken.type, expectedToken.type, `Expected type ${expectedToken.type} ('${expectedToken.literal}'), got ${actualToken.type} ('${actualToken.literal}') at line ${actualToken.line}, col ${actualToken.column}`);
+        assertEquals(actualToken.literal, expectedToken.literal, `Expected literal '${expectedToken.literal}', got '${actualToken.literal}' at line ${actualToken.line}, col ${actualToken.column}`);
+        assertEquals(actualToken.line, expectedToken.line, `Expected line ${expectedToken.line}, got ${actualToken.line} for literal '${expectedToken.literal}'`);
+        assertEquals(actualToken.column, expectedToken.column, `Expected column ${expectedToken.column}, got ${actualToken.column} for literal '${expectedToken.literal}'`);
+    }
+});
+
+// --- New Tests for Tilde with Mode Identifiers ---
+
+Deno.test("Lexer: handles ~trk directive", () => {
+    const input = `~trk`;
+    const expectedTokens: Token[] = [
+        { type: TokenType.TILDE, literal: "~", line: 1, column: 1 },
+        { type: TokenType.IDENTIFIER, literal: "trk", line: 1, column: 2 }, // "trk" is an IDENTIFIER at lexer level
+        { type: TokenType.EOF, literal: "", line: 1, column: 5 },
+    ];
+
+    const lexer = new Lexer(input, base_keywords);
+    for (const expectedToken of expectedTokens) {
+        const actualToken = lexer.nextToken();
+        assertEquals(actualToken.type, expectedToken.type, `Expected type ${expectedToken.type} ('${expectedToken.literal}'), got ${actualToken.type} ('${actualToken.literal}') at line ${actualToken.line}, col ${actualToken.column}`);
+        assertEquals(actualToken.literal, expectedToken.literal, `Expected literal '${expectedToken.literal}', got '${actualToken.literal}' at line ${actualToken.line}, col ${actualToken.column}`);
+        assertEquals(actualToken.line, expectedToken.line, `Expected line ${expectedToken.line}, got ${actualToken.line} for literal '${expectedToken.literal}'`);
+        assertEquals(actualToken.column, expectedToken.column, `Expected column ${expectedToken.column}, got ${actualToken.column} for literal '${expectedToken.literal}'`);
+    }
+});
+
+Deno.test("Lexer: handles ~qzq directive", () => {
+    const input = `~qzq`;
+    const expectedTokens: Token[] = [
+        { type: TokenType.TILDE, literal: "~", line: 1, column: 1 },
+        { type: TokenType.IDENTIFIER, literal: "qzq", line: 1, column: 2 }, // "qzq" is an IDENTIFIER at lexer level
+        { type: TokenType.EOF, literal: "", line: 1, column: 5 },
+    ];
+
+    const lexer = new Lexer(input, base_keywords);
+    for (const expectedToken of expectedTokens) {
+        const actualToken = lexer.nextToken();
+        assertEquals(actualToken.type, expectedToken.type, `Expected type ${expectedToken.type} ('${expectedToken.literal}'), got ${actualToken.type} ('${actualToken.literal}') at line ${actualToken.line}, col ${actualToken.column}`);
+        assertEquals(actualToken.literal, expectedToken.literal, `Expected literal '${expectedToken.literal}', got '${actualToken.literal}' at line ${actualToken.line}, col ${actualToken.column}`);
+        assertEquals(actualToken.line, expectedToken.line, `Expected line ${expectedToken.line}, got ${actualToken.line} for literal '${expectedToken.literal}'`);
+        assertEquals(actualToken.column, expectedToken.column, `Expected column ${expectedToken.column}, got ${actualToken.column} for literal '${expectedToken.literal}'`);
+    }
+});
+
+Deno.test("Lexer: handles ~base directive", () => {
+    const input = `~base`;
+    const expectedTokens: Token[] = [
+        { type: TokenType.TILDE, literal: "~", line: 1, column: 1 },
+        { type: TokenType.IDENTIFIER, literal: "base", line: 1, column: 2 }, // "base" is an IDENTIFIER at lexer level
+        { type: TokenType.EOF, literal: "", line: 1, column: 6 },
+    ];
+
+    const lexer = new Lexer(input, base_keywords);
+    for (const expectedToken of expectedTokens) {
+        const actualToken = lexer.nextToken();
+        assertEquals(actualToken.type, expectedToken.type, `Expected type ${expectedToken.type} ('${expectedToken.literal}'), got ${actualToken.type} ('${actualToken.literal}') at line ${actualToken.line}, col ${actualToken.column}`);
+        assertEquals(actualToken.literal, expectedToken.literal, `Expected literal '${expectedToken.literal}', got '${actualToken.literal}' at line ${actualToken.line}, col ${actualToken.column}`);
+        assertEquals(actualToken.line, expectedToken.line, `Expected line ${expectedToken.line}, got ${actualToken.line} for literal '${expectedToken.literal}'`);
+        assertEquals(actualToken.column, expectedToken.column, `Expected column ${expectedToken.column}, got ${actualToken.column} for literal '${expectedToken.literal}'`);
+    }
+});
+
+Deno.test("Lexer: handles ~invalid_mode (unknown directive)", () => {
+    const input = `~invalid_mode`;
+    const expectedTokens: Token[] = [
+        { type: TokenType.TILDE, literal: "~", line: 1, column: 1 },
+        { type: TokenType.IDENTIFIER, literal: "invalid_mode", line: 1, column: 2 }, // Still an IDENTIFIER for the lexer
+        { type: TokenType.EOF, literal: "", line: 1, column: 14 },
+    ];
+
+    const lexer = new Lexer(input, base_keywords);
+    for (const expectedToken of expectedTokens) {
+        const actualToken = lexer.nextToken();
+        assertEquals(actualToken.type, expectedToken.type, `Expected type ${expectedToken.type} ('${expectedToken.literal}'), got ${actualToken.type} ('${actualToken.literal}') at line ${actualToken.line}, col ${actualToken.column}`);
+        assertEquals(actualToken.literal, expectedToken.literal, `Expected literal '${expectedToken.literal}', got '${actualToken.literal}' at line ${actualToken.line}, col ${actualToken.column}`);
+        assertEquals(actualToken.line, expectedToken.line, `Expected line ${expectedToken.line}, got ${actualToken.line} for literal '${expectedToken.literal}'`);
+        assertEquals(actualToken.column, expectedToken.column, `Expected column ${expectedToken.column}, got ${actualToken.column} for literal '${expectedToken.literal}'`);
+    }
+});
+
+Deno.test("Lexer: handles ~ followed by whitespace then identifier", () => {
+    const input = `~   qzq`; // Tilde, then spaces, then identifier
+    const expectedTokens: Token[] = [
+        { type: TokenType.TILDE, literal: "~", line: 1, column: 1 },
+        // Whitespace is skipped, so the column of 'qzq' is adjusted
+        { type: TokenType.IDENTIFIER, literal: "qzq", line: 1, column: 5 },
+        { type: TokenType.EOF, literal: "", line: 1, column: 8 },
+    ];
+
+    const lexer = new Lexer(input, base_keywords);
+    for (const expectedToken of expectedTokens) {
+        const actualToken = lexer.nextToken();
+        assertEquals(actualToken.type, expectedToken.type, `Expected type ${expectedToken.type} ('${expectedToken.literal}'), got ${actualToken.type} ('${actualToken.literal}') at line ${actualToken.line}, col ${actualToken.column}`);
+        assertEquals(actualToken.literal, expectedToken.literal, `Expected literal '${expectedToken.literal}', got '${actualToken.literal}' at line ${actualToken.line}, col ${actualToken.column}`);
+        assertEquals(actualToken.line, expectedToken.line, `Expected line ${expectedToken.line}, got ${actualToken.line} for literal '${expectedToken.literal}'`);
+        assertEquals(actualToken.column, expectedToken.column, `Expected column ${expectedToken.column}, got ${actualToken.column} for literal '${expectedToken.literal}'`);
+    }
+});
+
+Deno.test("Lexer: handles multiple mode directives on separate lines", () => {
+    const input = `~qzq
+let x = 10
+~trk
+let y = 20`;
+    const expectedTokens: Token[] = [
+        { type: TokenType.TILDE, literal: "~", line: 1, column: 1 },
+        { type: TokenType.IDENTIFIER, literal: "qzq", line: 1, column: 2 },
+        { type: TokenType.NEWLINE, literal: "\n", line: 1, column: 5 },
+
+        { type: TokenType.LET, literal: "let", line: 2, column: 1 },
+        { type: TokenType.IDENTIFIER, literal: "x", line: 2, column: 5 },
+        { type: TokenType.ASSIGN, literal: "=", line: 2, column: 7 },
+        { type: TokenType.INTEGER, literal: "10", line: 2, column: 9 },
+        { type: TokenType.NEWLINE, literal: "\n", line: 2, column: 11 },
+
+        { type: TokenType.TILDE, literal: "~", line: 3, column: 1 },
+        { type: TokenType.IDENTIFIER, literal: "trk", line: 3, column: 2 },
+        { type: TokenType.NEWLINE, literal: "\n", line: 3, column: 5 },
+
+        { type: TokenType.LET, literal: "let", line: 4, column: 1 },
+        { type: TokenType.IDENTIFIER, literal: "y", line: 4, column: 5 },
+        { type: TokenType.ASSIGN, literal: "=", line: 4, column: 7 },
+        { type: TokenType.INTEGER, literal: "20", line: 4, column: 9 },
+        { type: TokenType.EOF, literal: "", line: 4, column: 11 },
+    ];
+
+    const lexer = new Lexer(input, base_keywords);
+    for (const expectedToken of expectedTokens) {
+        const actualToken = lexer.nextToken();
+        assertEquals(actualToken.type, expectedToken.type, `Expected type ${expectedToken.type} ('${expectedToken.literal}'), got ${actualToken.type} ('${actualToken.literal}') at line ${actualToken.line}, col ${actualToken.column}`);
+        assertEquals(actualToken.literal, expectedToken.literal, `Expected literal '${expectedToken.literal}', got '${actualToken.literal}' at line ${actualToken.line}, col ${actualToken.column}`);
+        assertEquals(actualToken.line, expectedToken.line, `Expected line ${expectedToken.line}, got ${actualToken.line} for literal '${expectedToken.literal}'`);
+        assertEquals(actualToken.column, expectedToken.column, `Expected column ${expectedToken.column}, got ${actualToken.column} for literal '${expectedToken.literal}'`);
     }
 });

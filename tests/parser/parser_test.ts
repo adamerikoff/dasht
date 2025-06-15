@@ -10,9 +10,9 @@ console.log("======================================");
 
 
 Deno.test("Parser: handles ILLEGAL token", () => {
-    const input = `~`; // An illegal character
+    const input = `;`; // An illegal character
     const expectedTokens: Token[] = [
-        { type: TokenType.ILLEGAL, literal: "~", line: 1, column: 1 },
+        { type: TokenType.ILLEGAL, literal: ";", line: 1, column: 1 },
         { type: TokenType.EOF, literal: "", line: 1, column: 2 },
     ];
 

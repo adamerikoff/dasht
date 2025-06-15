@@ -12,6 +12,7 @@ export enum TokenType {
     STRING = "STRING",
 
     // Operators
+    TILDE = "~",
     ASSIGN = "=",
     PLUS = "+",
     MINUS = "-",

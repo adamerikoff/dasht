@@ -208,6 +208,10 @@ export class Lexer {
                 token = { type: TokenType.NEWLINE, literal: this.character, line: tokenLine, column: tokenColumn };
                 this.readCharacter(); // Consume the newline
                 break;
+            case '~':
+                token = { type: TokenType.TILDE, literal: this.character, line: tokenLine, column: tokenColumn };
+                this.readCharacter(); // Consume the newline
+                break;
             case '"':
                 const stringLiteral = this.readString();
                 token = { type: TokenType.STRING, literal: stringLiteral, line: tokenLine, column: tokenColumn };
