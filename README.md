@@ -1,8 +1,8 @@
-# Dasht: A Multi-Dialect Programming Language Interpreter
+# Deshti: A Multi-Dialect Programming Language Interpreter
 
-Dasht (Дашт, meaning "plain" or "steppe" in Kazakh) is a programming language interpreter designed for script flexibility and cultural inclusivity. It delivers a dynamic and unified coding experience, allowing you to write code using different available programming language dialects within the same codebase, all without needing external preprocessors or complex build steps.
+Deshti (Дешті, meaning "plain" or "steppe" in Kazakh) is a programming language interpreter designed for script flexibility and cultural inclusivity. It delivers a dynamic and unified coding experience, allowing you to write code using different available programming language dialects within the same codebase, all without needing external preprocessors or complex build steps.
 
-Dasht is an experiment in lexical adaptability within a single language. The goal is to enable developers to write code using keywords from different natural languages (or "dialects") and have the interpreter understand and execute it seamlessly.
+Deshti is an experiment in lexical adaptability within a single language. The goal is to enable developers to write code using keywords from different natural languages (or "dialects") and have the interpreter understand and execute it seamlessly.
 
 ---
 
