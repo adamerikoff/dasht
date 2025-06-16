@@ -145,48 +145,30 @@ export class Lexer {
         return this.keywords[literal];
     }
 
-    /**
-     * Reads a string literal, including handling the opening and closing quotes.
-     * Assumes the current character is the opening quote (e.g., '"').
-     * The literal value will be the content between the quotes.
-     * @returns The string content (without quotes) or an empty string if unclosed.
-     */
     readString(): string {
-        const startPosition = this.currentPosition + 1; // Start *after* the opening quote
+        // Store the opening quote position
+        const quotePosition = this.currentPosition;
+        let stringContent = '';
         let isClosed = false;
 
-        this.readCharacter(); // Consume the opening '"'
+        this.readCharacter(); // Consume the opening quote
 
+        // Read until closing quote or EOF
         while (this.character !== '' && this.character !== '"') {
-            // Basic handling for escape sequences (e.g., \" to include a quote)
-            // You might want a more sophisticated escape sequence parser later.
-            if (this.character === '\\' && this.peekCharacter() === '"') {
-                this.readCharacter(); // Consume '\'
-                this.readCharacter(); // Consume '"'
-            } else {
-                this.readCharacter();
-            }
+            stringContent += this.character;
+            this.readCharacter();
         }
 
-        // Check if the string was properly closed
+        // Check if we found the closing quote
         if (this.character === '"') {
             isClosed = true;
+            this.readCharacter(); // Consume the closing quote
+        } else {
+            console.warn(`Unclosed string at line ${this.currentLine}, column ${quotePosition}`);
         }
 
-        const literalContent = this.input.substring(startPosition, this.currentPosition);
-
-        this.readCharacter(); // Consume the closing '"' (or the character that broke the loop if unclosed)
-
-        // You might want to store whether the string was closed or not on the token itself
-        // or throw an error immediately if unclosed. For now, we'll just return the literal.
-        if (!isClosed) {
-            // In a real lexer, you'd likely report a LexerError for an unclosed string.
-            // For simplicity here, we'll just return what we read.
-            // throw new LexerError("Unclosed string literal", this.currentLine, startPosition);
-            console.warn(`Lexer Warning: Unclosed string literal at Line ${this.currentLine}, Column ${startPosition}`);
-        }
-
-        return literalContent;
+        // Return the full string including quotes
+        return `"${stringContent}"${isClosed ? '' : ''}`;
     }
     
     /**

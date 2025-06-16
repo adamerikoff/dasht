@@ -156,11 +156,11 @@ Deno.test("Lexer: handles STRING token", () => {
     `;
     const expectedTokens: Token[] = [
         { type: TokenType.NEWLINE, literal: "\n", line: 1, column: 1 },
-        { type: TokenType.STRING, literal: "hello world", line: 2, column: 5 },
+        { type: TokenType.STRING, literal: '"hello world"', line: 2, column: 5 },
         { type: TokenType.NEWLINE, literal: "\n", line: 2, column: 18 },
-        { type: TokenType.STRING, literal: "123", line: 3, column: 5 },
+        { type: TokenType.STRING, literal: '"123"', line: 3, column: 5 },
         { type: TokenType.NEWLINE, literal: "\n", line: 3, column: 10 },
-        { type: TokenType.STRING, literal: "", line: 4, column: 5 },
+        { type: TokenType.STRING, literal: '""', line: 4, column: 5 },
         { type: TokenType.NEWLINE, literal: "\n", line: 4, column: 7 },
         { type: TokenType.EOF, literal: "", line: 5, column: 5 },
     ];
@@ -861,7 +861,7 @@ Deno.test("Lexer: comprehensive test with all token types (no semicolons, indent
         { type: TokenType.LBRACE, literal: "{", line: 18, column: 12 }, // 8 + 4
         { type: TokenType.NEWLINE, literal: "\n", line: 18, column: 13 }, // 9 + 4
         { type: TokenType.RETURN, literal: "return", line: 19, column: 9 }, // 5 + 4
-        { type: TokenType.STRING, literal: "equal", line: 19, column: 16 }, // 12 + 4
+        { type: TokenType.STRING, literal: '"equal"', line: 19, column: 16 }, // 12 + 4
         { type: TokenType.NEWLINE, literal: "\n", line: 19, column: 23 }, // 19 + 4
         { type: TokenType.RBRACE, literal: "}", line: 20, column: 5 }, // 1 + 4
         { type: TokenType.NEWLINE, literal: "\n", line: 20, column: 6 }, // 2 + 4
@@ -871,13 +871,13 @@ Deno.test("Lexer: comprehensive test with all token types (no semicolons, indent
         { type: TokenType.COMMA, literal: ",", line: 21, column: 7 }, // 3 + 4
         { type: TokenType.INTEGER, literal: "2", line: 21, column: 9 }, // 5 + 4
         { type: TokenType.COMMA, literal: ",", line: 21, column: 10 }, // 6 + 4
-        { type: TokenType.STRING, literal: "three", line: 21, column: 12 }, // 8 + 4
+        { type: TokenType.STRING, literal: '"three"', line: 21, column: 12 }, // 8 + 4
         { type: TokenType.RBRACKET, literal: "]", line: 21, column: 19 }, // 15 + 4
         { type: TokenType.NEWLINE, literal: "\n", line: 21, column: 20 }, // 16 + 4
 
-        { type: TokenType.STRING, literal: "hello", line: 22, column: 5 }, // 1 + 4
+        { type: TokenType.STRING, literal: '"hello"', line: 22, column: 5 }, // 1 + 4
         { type: TokenType.AND, literal: "and", line: 22, column: 13 }, // 9 + 4
-        { type: TokenType.STRING, literal: "world", line: 22, column: 17 }, // 15 + 4
+        { type: TokenType.STRING, literal: '"world"', line: 22, column: 17 }, // 15 + 4
         { type: TokenType.OR, literal: "or", line: 22, column: 25 }, // 23 + 4
         { type: TokenType.INTEGER, literal: "123", line: 22, column: 28 }, // 26 + 4
         { type: TokenType.NEWLINE, literal: "\n", line: 22, column: 31 }, // 29 + 4
