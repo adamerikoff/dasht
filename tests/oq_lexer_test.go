@@ -1,7 +1,6 @@
 package tests
 
 import (
-	"fmt"
 	"testing"
 
 	"github.com/adamerikoff/oq/internal/oq_lexer"
@@ -163,7 +162,6 @@ func TestNextToken(t *testing.T) {
 
 	for i, tt := range tests {
 		tok := l.NextToken()
-		fmt.Printf("{Type:%s Literal:%q}\n", tok.Type, tok.Literal)
 		if tok.Type != tt.expectedType {
 			t.Fatalf("tests[%d] - tokentype wrong.\nexpected=%q (%q), got=%q (%q)",
 				i, tt.expectedType, tt.expectedLiteral, tok.Type, tok.Literal)

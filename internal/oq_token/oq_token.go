@@ -27,12 +27,12 @@ const (
 	OR            = "OR"  // Logical OR operator (from keywords)
 
 	// Delimiters
-	COMMA    = ","  // Separator for arguments, list items
-	LPAREN   = "("  // Left parenthesis
-	RPAREN   = ")"  // Right parenthesis
-	LBRACE   = "{"  // Left curly brace (for blocks, objects)
-	RBRACE   = "}"  // Right curly brace
-	NEW_LINE = "\n" // Newline character
+	COMMA    = ","        // Separator for arguments, list items
+	LPAREN   = "("        // Left parenthesis
+	RPAREN   = ")"        // Right parenthesis
+	LBRACE   = "{"        // Left curly brace (for blocks, objects)
+	RBRACE   = "}"        // Right curly brace
+	NEW_LINE = "NEW_LINE" // Newline character
 
 	// Keywords (Reserved words with special meaning)
 	FUNCTION = "FUNCTION" // e.g., `fn`
