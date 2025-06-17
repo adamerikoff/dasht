@@ -1,6 +1,7 @@
 package tests
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/adamerikoff/oq/internal/oq_lexer"
@@ -28,6 +29,7 @@ func TestNextToken(t *testing.T) {
 		}
 		10 == 10
 		10 != 9
+		a
     `
 
 	tests := []struct {
@@ -153,12 +155,15 @@ func TestNextToken(t *testing.T) {
 		{oq_token.INTEGER, "9"},
 		{oq_token.NEW_LINE, "\n"},
 
+		{oq_token.IDENTIFIER, "a"},
+		{oq_token.NEW_LINE, "\n"},
 		{oq_token.EOF, ""},
 	}
 	l := oq_lexer.New(input)
 
 	for i, tt := range tests {
 		tok := l.NextToken()
+		fmt.Printf("{Type:%s Literal:%q}\n", tok.Type, tok.Literal)
 		if tok.Type != tt.expectedType {
 			t.Fatalf("tests[%d] - tokentype wrong.\nexpected=%q (%q), got=%q (%q)",
 				i, tt.expectedType, tt.expectedLiteral, tok.Type, tok.Literal)

@@ -55,10 +55,6 @@ func (l *Lexer) readCharacter() {
 		return
 	}
 
-	// currentPosition is updated to point to the start of the character
-	// we are about to read. This is crucial for obtaining the literal of a token.
-	l.currentPosition = l.nextPosition
-
 	// Decode the next rune (Unicode code point) and its size in bytes from the input string.
 	// l.input[l.nextPosition:] creates a slice from the current reading head to the end,
 	// allowing DecodeRuneInString to read the complete UTF-8 character.
@@ -66,6 +62,10 @@ func (l *Lexer) readCharacter() {
 
 	// Assign the decoded rune to the lexer's current character.
 	l.character = r
+
+	// currentPosition is updated to point to the start of the character
+	// we are about to read. This is crucial for obtaining the literal of a token.
+	l.currentPosition = l.nextPosition
 
 	// Advance nextPosition by the number of bytes this rune occupied.
 	// This ensures we move past the entire character, not just one byte.
