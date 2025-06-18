@@ -60,9 +60,37 @@ func Eval(node oq_ast.Node, env *Environment) Object {
 			return val
 		}
 		return &ReturnValue{Value: val}
+	case *oq_ast.FunctionLiteral:
+		params := node.Parameters
+		body := node.Body
+		return &Function{Parameters: params, Env: env, Body: body}
+	case *oq_ast.CallExpression:
+		function := Eval(node.Function, env)
+		if isError(function) {
+			return function
+		}
+		args := evalExpressions(node.Arguments, env)
+		if len(args) == 1 && isError(args[0]) {
+			return args[0]
+		}
+		return applyFunction(function, args)
 	}
 
 	return nil
+}
+
+func evalExpressions(exps []oq_ast.Expression, env *Environment) []Object {
+	var result []Object
+
+	for _, e := range exps {
+		evaluated := Eval(e, env)
+		if isError(evaluated) {
+			return []Object{evaluated}
+		}
+		result = append(result, evaluated)
+	}
+
+	return result
 }
 
 func nativeBoolToBooleanObject(input bool) *Boolean {
@@ -302,4 +330,29 @@ func evalIdentifier(node *oq_ast.Identifier, env *Environment) Object {
 		return newError("identifier not found: " + node.Value)
 	}
 	return val
+}
+
+func applyFunction(fn Object, args []Object) Object {
+	function, ok := fn.(*Function)
+	if !ok {
+		return newError("not a function: %s", fn.Type())
+	}
+	extendedEnv := extendFunctionEnv(function, args)
+	evaluated := Eval(function.Body, extendedEnv)
+	return unwrapReturnValue(evaluated)
+}
+
+func extendFunctionEnv(fn *Function, args []Object) *Environment {
+	env := NewEnclosedEnvironment(fn.Env)
+	for paramIdx, param := range fn.Parameters {
+		env.Set(param.Value, args[paramIdx])
+	}
+	return env
+}
+
+func unwrapReturnValue(obj Object) Object {
+	if returnValue, ok := obj.(*ReturnValue); ok {
+		return returnValue.Value
+	}
+	return obj
 }
