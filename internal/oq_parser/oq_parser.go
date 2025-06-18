@@ -74,6 +74,7 @@ func (p *Parser) registerParsingFunctions() {
 	p.registerPrefix(oq_token.LPAREN, p.parseGroupedExpression)
 	p.registerPrefix(oq_token.IF, p.parseIfExpression)
 	p.registerPrefix(oq_token.FUNCTION, p.parseFunctionLiteral)
+	p.registerPrefix(oq_token.STRING, p.parseStringLiteral)
 
 	p.infixParseFunctions = make(map[oq_token.TokenType]infixParseFunction)
 	p.registerInfix(oq_token.PLUS, p.parseInfixExpression)
@@ -484,4 +485,8 @@ func (p *Parser) parseDialectSwitchDirective() oq_ast.Statement { // Returns Sta
 		}
 		return nil // Still return nil to indicate no AST node, but an error has been logged.
 	}
+}
+
+func (p *Parser) parseStringLiteral() oq_ast.Expression {
+	return &oq_ast.StringLiteral{Token: p.currentToken, Value: p.currentToken.Literal}
 }

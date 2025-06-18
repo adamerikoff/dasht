@@ -85,6 +85,9 @@ func (l *Lexer) NextToken() oq_token.Token {
 		// Lexer's job: recognize '~' as a distinct token.
 		// The parser will then decide what to do with a TILDE token followed by an IDENTIFIER.
 		tok = oq_token.NewToken(oq_token.TILDE, l.character)
+	case '"':
+		tok.Type = oq_token.STRING
+		tok.Literal = l.readString()
 	case '=':
 		// Handle '==' (EQUAL) or '=' (ASSIGN)
 		if l.peekCharacter() == '=' {
@@ -244,4 +247,15 @@ func (l *Lexer) SetInput(input string) {
 	l.currentPosition = 0
 	l.nextPosition = 0
 	l.readCharacter()
+}
+
+func (l *Lexer) readString() string {
+	position := l.currentPosition + 1
+	for {
+		l.readCharacter()
+		if l.character == '"' || l.character == 0 {
+			break
+		}
+	}
+	return l.input[position:l.currentPosition]
 }

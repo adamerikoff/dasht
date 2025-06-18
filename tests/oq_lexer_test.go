@@ -29,6 +29,8 @@ func TestNextToken(t *testing.T) {
 		10 == 10
 		10 != 9
 		a
+		"foobar"
+		"foo bar"
     `
 
 	tests := []struct {
@@ -156,6 +158,13 @@ func TestNextToken(t *testing.T) {
 
 		{oq_token.IDENTIFIER, "a"},
 		{oq_token.NEW_LINE, "\n"},
+
+		{oq_token.STRING, "foobar"},
+		{oq_token.NEW_LINE, "\n"},
+
+		{oq_token.STRING, "foo bar"},
+		{oq_token.NEW_LINE, "\n"},
+
 		{oq_token.EOF, ""},
 	}
 	l := oq_lexer.New(input)

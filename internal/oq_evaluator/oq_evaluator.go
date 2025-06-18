@@ -36,6 +36,8 @@ func Eval(node oq_ast.Node, env *Environment) Object {
 		}
 		return evalPrefixExpression(node.Operator, right)
 	// Expressions
+	case *oq_ast.StringLiteral:
+		return &String{Value: node.Value}
 	case *oq_ast.IntegerLiteral:
 		return &Integer{Value: node.Value}
 	case *oq_ast.FloatLiteral: // Add this case
@@ -157,6 +159,9 @@ func evalInfixExpression(operator string, left, right Object) Object {
 	// Case 4: Both are Booleans (for == and !=)
 	if left.Type() == BOOLEAN_OBJ && right.Type() == BOOLEAN_OBJ {
 		return evalBooleanInfixExpression(operator, left, right)
+	}
+	if left.Type() == STRING_OBJ && right.Type() == STRING_OBJ {
+		return evalStringInfixExpression(operator, left, right)
 	}
 	// Default: Handle other types or invalid combinations
 	return newError("type mismatch: %s %s %s", left.Type(), operator, right.Type())
@@ -325,21 +330,28 @@ func isError(obj Object) bool {
 }
 
 func evalIdentifier(node *oq_ast.Identifier, env *Environment) Object {
-	val, ok := env.Get(node.Value)
-	if !ok {
-		return newError("identifier not found: " + node.Value)
+	if val, ok := env.Get(node.Value); ok {
+		return val
 	}
-	return val
+
+	if builtin, ok := builtins[node.Value]; ok {
+		return builtin
+	}
+
+	return newError("identifier not found: " + node.Value)
 }
 
 func applyFunction(fn Object, args []Object) Object {
-	function, ok := fn.(*Function)
-	if !ok {
+	switch fn := fn.(type) {
+	case *Function:
+		extendedEnv := extendFunctionEnv(fn, args)
+		evaluated := Eval(fn.Body, extendedEnv)
+		return unwrapReturnValue(evaluated)
+	case *Builtin:
+		return fn.Fn(args...)
+	default:
 		return newError("not a function: %s", fn.Type())
 	}
-	extendedEnv := extendFunctionEnv(function, args)
-	evaluated := Eval(function.Body, extendedEnv)
-	return unwrapReturnValue(evaluated)
 }
 
 func extendFunctionEnv(fn *Function, args []Object) *Environment {
@@ -355,4 +367,16 @@ func unwrapReturnValue(obj Object) Object {
 		return returnValue.Value
 	}
 	return obj
+}
+
+func evalStringInfixExpression(operator string, left, right Object) Object {
+	if operator != "+" {
+		return newError("unknown operator: %s %s %s",
+			left.Type(), operator, right.Type())
+	}
+
+	leftVal := left.(*String).Value
+	rightVal := right.(*String).Value
+
+	return &String{Value: leftVal + rightVal}
 }
