@@ -173,6 +173,8 @@ func (p *Parser) parseStatement() oq_ast.Statement {
 		return p.parseReturnStatement()
 	case oq_token.TILDE: // Handle TILDE directly here
 		return p.parseDialectSwitchDirective() // A new function that returns nil or a specific Directive AST node
+	case oq_token.NEW_LINE:
+		return nil
 	default:
 		return p.parseExpressionStatement()
 	}
