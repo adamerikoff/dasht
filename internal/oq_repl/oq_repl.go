@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 
+	"github.com/adamerikoff/oq/internal/oq_evaluator"
 	"github.com/adamerikoff/oq/internal/oq_lexer"
 	"github.com/adamerikoff/oq/internal/oq_parser"
 )
@@ -14,6 +15,8 @@ const PROMPT = "🏹"
 func Start(in io.Reader, out io.Writer) {
 	scanner := bufio.NewScanner(in)
 
+	env := oq_evaluator.NewEnvironment()
+
 	for {
 		fmt.Printf(PROMPT)
 		scanned := scanner.Scan()
@@ -21,7 +24,7 @@ func Start(in io.Reader, out io.Writer) {
 			return
 		}
 
-		line := "~trk" + scanner.Text() + "\n"
+		line := scanner.Text() + "\n"
 
 		l := oq_lexer.New(line)
 		p := oq_parser.New(l)
@@ -32,8 +35,11 @@ func Start(in io.Reader, out io.Writer) {
 			continue
 		}
 
-		io.WriteString(out, program.String())
-		io.WriteString(out, "\n")
+		evaluated := oq_evaluator.Eval(program, env)
+		if evaluated != nil {
+			io.WriteString(out, evaluated.Inspect())
+			io.WriteString(out, "\n")
+		}
 	}
 }
 
