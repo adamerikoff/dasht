@@ -190,7 +190,7 @@ func (l *Lexer) skipWhitespace() {
 }
 
 func isLetter(character rune) bool {
-	return unicode.IsLetter(character)
+	return unicode.IsLetter(character) || character == '_'
 }
 
 func isDigit(character rune) bool {
