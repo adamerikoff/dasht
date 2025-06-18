@@ -32,7 +32,7 @@ func TestFunctionApplication(t *testing.T) {
 	}
 }
 func TestFunctionObject(t *testing.T) {
-	input := "fn(x) { x + 2; } "
+	input := "fn(x) { x + 2 } "
 
 	evaluated := testEval(input)
 
@@ -267,6 +267,9 @@ func TestEvalBooleanExpression(t *testing.T) {
 		{"(1 < 2) == false ", false},
 		{"(1 > 2) == true ", false},
 		{"(1 > 2) == false ", true},
+		{`~qzq
+        болсын y = шын
+        шын `, true},
 	}
 
 	for _, tt := range tests {
