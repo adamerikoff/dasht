@@ -71,7 +71,7 @@ func NewToken(tokenType TokenType, character rune) Token {
 // --- Keyword Maps (Equivalent to your src/lexer/keywords.ts) ---
 
 // BaseKeywords maps English keywords to their TokenType and baseLiteral.
-var BaseKeywords = map[string]KeywordInfo{
+var EngKeywords = map[string]KeywordInfo{
 	"fn":     {Type: FUNCTION, BaseLiteral: "fn"},
 	"let":    {Type: LET, BaseLiteral: "let"},
 	"true":   {Type: TRUE, BaseLiteral: "true"},
@@ -120,9 +120,9 @@ var TrkKeywords = map[string]KeywordInfo{
 
 // AllDialectsMap is a convenience map to get keyword maps by dialect name.
 var AllDialectsMap = map[string]map[string]KeywordInfo{
-	"base": BaseKeywords,
-	"qzq":  QzqKeywords,
-	"trk":  TrkKeywords,
+	"eng": EngKeywords,
+	"qzq": QzqKeywords,
+	"trk": TrkKeywords,
 }
 
 // LookupIdent checks if a given identifier string is a keyword in the provided dialect map.

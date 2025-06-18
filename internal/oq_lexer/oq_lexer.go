@@ -20,7 +20,7 @@ type Lexer struct {
 func New(input string) *Lexer {
 	l := &Lexer{
 		input:    input,
-		keywords: oq_token.BaseKeywords,
+		keywords: oq_token.EngKeywords,
 	} // Default to base keywords on creation
 
 	l.readCharacter()
@@ -33,7 +33,7 @@ func (l *Lexer) SetDialect(dialect string) {
 	if newKeywords, ok := oq_token.AllDialectsMap[dialect]; ok {
 		l.keywords = newKeywords
 	} else {
-		l.keywords = oq_token.BaseKeywords
+		l.keywords = oq_token.EngKeywords
 		fmt.Printf("Warning: Unknown dialect '%s'. Keeping default(eng) keyword map.\n", dialect)
 	}
 }
@@ -156,13 +156,13 @@ func (l *Lexer) NextToken() oq_token.Token {
 			// Look up the identifier using the lexer's *own* keyword map
 			keywordInfo := oq_token.LookupIdent(actualLiteral, l.keywords)
 
-			tok.Type = keywordInfo.Type // The token's type comes from the lookup (e.g., FUNCTION or IDENTIFIER)
-			tok.Literal = actualLiteral // The token's literal is the *actual* text from the source
+			tok.Type = keywordInfo.Type           // The token's type comes from the lookup (e.g., FUNCTION or IDENTIFIER)
+			tok.Literal = keywordInfo.BaseLiteral // The token's literal is the *actual* text from the source
 			// tok.BaseLiteral = keywordInfo.BaseLiteral // Optionally, store the base literal here
 			return tok // `readIdentifier` already advanced `l.character`
 		} else if isDigit(l.character) {
 			tok.Literal = l.readNumber()
-			if containsDecimal(tok.Literal) {
+			if l.containsDecimal(tok.Literal) {
 				tok.Type = oq_token.FLOAT
 			} else {
 				tok.Type = oq_token.INTEGER
@@ -226,11 +226,22 @@ func (l *Lexer) readNumber() string {
 	return l.input[position:l.currentPosition]
 }
 
-func containsDecimal(s string) bool {
+func (l *Lexer) containsDecimal(s string) bool {
 	for _, r := range s {
 		if r == '.' {
 			return true
 		}
 	}
 	return false
+}
+
+func (l *Lexer) GetActiveKeywords() map[string]oq_token.KeywordInfo {
+	return l.keywords
+}
+
+func (l *Lexer) SetInput(input string) {
+	l.input = input
+	l.currentPosition = 0
+	l.nextPosition = 0
+	l.readCharacter()
 }

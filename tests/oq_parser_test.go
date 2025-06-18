@@ -207,7 +207,8 @@ func TestLetStatements(t *testing.T) {
 }
 
 func TestReturnStatements(t *testing.T) {
-	input := `return 5
+	input := `~eng
+		return 5
         return 10
         return 993322
     `
@@ -252,7 +253,7 @@ func TestString(t *testing.T) {
 			},
 		},
 	}
-	if program.String() != "let myVar = anotherVar;" {
+	if program.String() != "let myVar = anotherVar" {
 		t.Errorf("program.String() wrong. got=%q", program.String())
 	}
 }
@@ -379,14 +380,6 @@ func TestParsingPrefixExpressions(t *testing.T) {
 		}},
 		{"!12.3 ", "!", func(t *testing.T, exp oq_ast.Expression) {
 			testFloatLiteral(t, exp, 12.3, "12.3")
-		}},
-
-		// Identifier literals with '~' (tilde operator)
-		{"~trk ", "~", func(t *testing.T, exp oq_ast.Expression) {
-			testIdentifier(t, exp, "trk")
-		}},
-		{"~qzq ", "~", func(t *testing.T, exp oq_ast.Expression) {
-			testIdentifier(t, exp, "qzq")
 		}},
 		// Boolean literals with '!'
 		{"!true ", "!", func(t *testing.T, exp oq_ast.Expression) {
@@ -766,4 +759,168 @@ func TestCallExpressionParsing(t *testing.T) {
 	testLiteralExpression(t, exp.Arguments[0], 1)
 	testInfixExpression(t, exp.Arguments[1], 2, "*", 3)
 	testInfixExpression(t, exp.Arguments[2], 4, "+", 5)
+}
+
+func TestDialectSwitchStatements(t *testing.T) {
+	tests := []struct {
+		input              string
+		expectedStatements []struct {
+			stmtType           string      // e.g., "LetStatement", "ExpressionStatement"
+			expectedLiteral    string      // The base token literal of the statement (e.g., "let", "if", "fn")
+			expectedIdentifier string      // For LetStatement variable name, or FunctionLiteral name
+			expectedValue      interface{} // For LetStatement value
+		}
+	}{
+		{
+			// Switch to Turkish, then declare a variable using 'olsun'.
+			input: `~trk
+                    olsun x = 10
+                   `,
+			expectedStatements: []struct {
+				stmtType           string
+				expectedLiteral    string
+				expectedIdentifier string
+				expectedValue      interface{}
+			}{
+				{
+					stmtType:           "LetStatement",
+					expectedLiteral:    "let", // EXPECT "let" now, as lexer returns base literal
+					expectedIdentifier: "x",
+					expectedValue:      10,
+				},
+			},
+		},
+		{
+			// Switch to Kazakh, then declare a variable using 'болсын'.
+			input: `~qzq
+                    болсын y = шын
+                   `,
+			expectedStatements: []struct {
+				stmtType           string
+				expectedLiteral    string
+				expectedIdentifier string
+				expectedValue      interface{}
+			}{
+				{
+					stmtType:           "LetStatement",
+					expectedLiteral:    "let", // EXPECT "let" now
+					expectedIdentifier: "y",
+					expectedValue:      true,
+				},
+			},
+		},
+		{
+			// Switch to Turkish, then declare a variable, then switch back to base/English
+			// and declare another variable.
+			input: `~trk
+                olsun a = 1
+                ~eng
+                let b = 2
+                `,
+			expectedStatements: []struct {
+				stmtType           string
+				expectedLiteral    string
+				expectedIdentifier string
+				expectedValue      interface{}
+			}{
+				{
+					stmtType:           "LetStatement",
+					expectedLiteral:    "let", // EXPECT "let" now
+					expectedIdentifier: "a",
+					expectedValue:      1,
+				},
+				{
+					stmtType:           "LetStatement",
+					expectedLiteral:    "let", // Already "let" in base dialect
+					expectedIdentifier: "b",
+					expectedValue:      2,
+				},
+			},
+		},
+		{
+			// Test an 'if' statement in Turkish dialect
+			input: `~trk
+                    eğer (x < y) { döndür x } yoksa { döndür y }
+                   `,
+			expectedStatements: []struct {
+				stmtType           string
+				expectedLiteral    string
+				expectedIdentifier string
+				expectedValue      interface{}
+			}{
+				{
+					stmtType:           "ExpressionStatement",
+					expectedLiteral:    "if", // EXPECT "if" now, as lexer returns base literal
+					expectedIdentifier: "",
+					expectedValue:      nil,
+				},
+			},
+		},
+	}
+
+	for i, tt := range tests {
+		t.Run(fmt.Sprintf("Test %d - Input: %q", i, tt.input), func(t *testing.T) {
+			l := oq_lexer.New(tt.input)
+			p := oq_parser.New(l)
+
+			program := p.ParseProgram()
+			checkParserErrors(t, p)
+
+			if len(program.Statements) != len(tt.expectedStatements) {
+				t.Fatalf("program.Statements does not contain %d statements after dialect switch. got=%d\nProgram:\n%s",
+					len(tt.expectedStatements), len(program.Statements), program.String()) // Added program.String() for debug
+			}
+
+			for j, expectedStmt := range tt.expectedStatements {
+				stmt := program.Statements[j]
+
+				switch expectedStmt.stmtType {
+				case "LetStatement":
+					letStmt, ok := stmt.(*oq_ast.LetStatement)
+					if !ok {
+						t.Errorf("Statement %d not *oq_ast.LetStatement. got=%T", j, stmt)
+						continue
+					}
+					// This comparison now expects the base literal, e.g., "let"
+					if letStmt.TokenLiteral() != expectedStmt.expectedLiteral {
+						t.Errorf("LetStatement %d TokenLiteral not %q. got=%q", j, expectedStmt.expectedLiteral, letStmt.TokenLiteral())
+					}
+					// The testLetStatement helper already checks the identifier's name and its literal
+					if !testLetStatement(t, stmt, expectedStmt.expectedIdentifier) {
+						return
+					}
+					val := stmt.(*oq_ast.LetStatement).Value
+					if !testLiteralExpression(t, val, expectedStmt.expectedValue) {
+						return
+					}
+				case "ExpressionStatement":
+					exprStmt, ok := stmt.(*oq_ast.ExpressionStatement)
+					if !ok {
+						t.Errorf("Statement %d not *oq_ast.ExpressionStatement. got=%T", j, stmt)
+						continue
+					}
+					// The TokenLiteral of the ExpressionStatement should match the base literal of the expression's keyword
+					if exprStmt.TokenLiteral() != expectedStmt.expectedLiteral {
+						t.Errorf("ExpressionStatement %d TokenLiteral not %q. got=%q", j, expectedStmt.expectedLiteral, exprStmt.TokenLiteral())
+					}
+
+					if expectedStmt.expectedLiteral == "if" { // Now checking against base literal "if"
+						_, ok := exprStmt.Expression.(*oq_ast.IfExpression)
+						if !ok {
+							t.Errorf("Expected IfExpression, got %T", exprStmt.Expression)
+						}
+					} else if expectedStmt.expectedLiteral == "fn" { // Now checking against base literal "fn"
+						_, ok := exprStmt.Expression.(*oq_ast.FunctionLiteral)
+						if !ok {
+							t.Errorf("Expected FunctionLiteral, got %T", exprStmt.Expression)
+							continue
+						}
+					}
+
+				default:
+					t.Errorf("Unknown expected statement type: %s", expectedStmt.stmtType)
+				}
+			}
+		})
+	}
 }

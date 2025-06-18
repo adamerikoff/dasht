@@ -21,7 +21,8 @@ func Start(in io.Reader, out io.Writer) {
 			return
 		}
 
-		line := scanner.Text() + "\n"
+		line := "~trk" + scanner.Text() + "\n"
+
 		l := oq_lexer.New(line)
 		p := oq_parser.New(l)
 

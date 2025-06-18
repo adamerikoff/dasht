@@ -69,7 +69,6 @@ func (p *Parser) registerParsingFunctions() {
 	p.registerPrefix(oq_token.FLOAT, p.parseFloatLiteral)
 	p.registerPrefix(oq_token.EXCLAMATION, p.parsePrefixExpression)
 	p.registerPrefix(oq_token.MINUS, p.parsePrefixExpression)
-	p.registerPrefix(oq_token.TILDE, p.parsePrefixExpression)
 	p.registerPrefix(oq_token.TRUE, p.parseBoolean)
 	p.registerPrefix(oq_token.FALSE, p.parseBoolean)
 	p.registerPrefix(oq_token.LPAREN, p.parseGroupedExpression)
@@ -171,6 +170,8 @@ func (p *Parser) parseStatement() oq_ast.Statement {
 		return p.parseLetStatement()
 	case oq_token.RETURN:
 		return p.parseReturnStatement()
+	case oq_token.TILDE: // Handle TILDE directly here
+		return p.parseDialectSwitchDirective() // A new function that returns nil or a specific Directive AST node
 	default:
 		return p.parseExpressionStatement()
 	}
@@ -448,4 +449,39 @@ func (p *Parser) parseCallArguments() []oq_ast.Expression {
 	}
 
 	return args
+}
+
+// parseDialectSwitchDirective would be:
+func (p *Parser) parseDialectSwitchDirective() oq_ast.Statement { // Returns Statement, but might be nil for successful switch
+	// currentToken is '~' (TILDE)
+	// tildeToken := p.currentToken // Store the TILDE token
+
+	// Expect the dialect identifier
+	if !p.expectPeek(oq_token.IDENTIFIER) {
+		// If not an identifier, it's an error or just a standalone '~' as prefix.
+		// For now, let's treat it as an error or let it fall through to a prefix expression if needed.
+		// If it's *supposed* to be a directive, then this is an error.
+		p.errors = append(p.errors, fmt.Sprintf("expected dialect name after '~', got %s", p.peekToken.Literal))
+		// Still need to consume the ~ token, perhaps.
+		p.nextToken() // Consume the non-identifier token
+		return nil    // Or return an error node
+	}
+
+	dialectName := p.currentToken.Literal // Get the dialect name string
+
+	if _, ok := oq_token.AllDialectsMap[dialectName]; ok {
+		p.l.SetDialect(dialectName)
+		// Consume the NEW_LINE if it exists after the dialect name, like other statements
+		if p.peekTokenIs(oq_token.NEW_LINE) {
+			p.nextToken()
+		}
+		return nil // Successfully processed directive, no AST node.
+	} else {
+		p.errors = append(p.errors, fmt.Sprintf("unknown dialect '%s'", dialectName))
+		// Consume the NEW_LINE if it exists after the dialect name
+		if p.peekTokenIs(oq_token.NEW_LINE) {
+			p.nextToken()
+		}
+		return nil // Still return nil to indicate no AST node, but an error has been logged.
+	}
 }
